@@ -1,0 +1,49 @@
+# ============================================================
+# .gitignore — FugaDoGasto SP
+# Protege contra publicação acidental de dados sensíveis
+# ============================================================
+
+# Variáveis de ambiente e segredos (nunca commitar!)
+.env
+.env.local
+.env.development
+.env.production
+.env*.local
+*.key
+*.pem
+*.p12
+secrets.json
+config.secret.*
+
+# Dependências de Node (caso o projeto evolua)
+node_modules/
+package-lock.json
+yarn.lock
+
+# Sistemas operacionais
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+desktop.ini
+
+# IDEs e editores
+.vscode/settings.json
+.idea/
+*.swp
+*.swo
+*~
+
+# Logs e arquivos temporários
+*.log
+*.tmp
+*.temp
+/scratch/
+
+# Build outputs (caso o projeto evolua)
+/dist/
+/build/
+/.cache/

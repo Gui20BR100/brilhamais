@@ -1,0 +1,1359 @@
+/* ==========================================================================
+   FugaDoGasto SP - Estilos v6.0 (Consulta de Placas & Placa Mercosul Card)
+   Design com camadas Google Maps, alertas Waze, rotas contextuais e consulta
+   veicular por placa sem exibir dados críticos (chassi/renavam protegidos).
+   ========================================================================== */
+
+:root {
+  --bg-primary: #0f172a;
+  --bg-secondary: #1e293b;
+  --bg-tertiary: #334155;
+  --bg-card: rgba(30, 41, 59, 0.94);
+  --bg-glass: rgba(15, 23, 42, 0.90);
+  
+  --text-main: #f8fafc;
+  --text-muted: #94a3b8;
+  --text-dim: #64748b;
+  
+  --color-toll: #ef4444;       /* Vermelho - Pedágio/Gasto pesado */
+  --color-radar: #f59e0b;      /* Âmbar/Laranja - Radar / Multa */
+  --color-gas: #10b981;        /* Verde Esmeralda - Combustível Barato */
+  --color-food: #3b82f6;       /* Azul - Comida Barata */
+  --color-rest: #8b5cf6;       /* Roxo - Descanso Grátis / Parada Segura */
+  --color-eco: #22c55e;        /* Verde Eco - Baixa Emissão de Carbono */
+  --color-google: #4285f4;     /* Azul Google / Expressa */
+  
+  /* CORES ESTILO WAZE */
+  --waze-hazard: #e11d48;      /* Risco de assalto / arrastão */
+  --waze-jam: #f97316;         /* Trânsito / congestionamento pesado */
+  --waze-works: #eab308;       /* Obras na pista */
+  --waze-police: #3b82f6;      /* Polícia Rodoviária */
+  --waze-weather: #06b6d4;     /* Neblina / Pista molhada */
+
+  --accent-gold: #fbbf24;
+  --accent-cyan: #06b6d4;
+  --border-color: rgba(255, 255, 255, 0.08);
+  --border-glow: rgba(16, 185, 129, 0.3);
+  
+  --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.25);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.35);
+  --shadow-lg: 0 10px 25px rgba(0, 0, 0, 0.5);
+  
+  --radius-sm: 6px;
+  --radius-md: 12px;
+  --radius-lg: 18px;
+  --radius-full: 9999px;
+
+  --font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: var(--font-family);
+  background-color: var(--bg-primary);
+  color: var(--text-main);
+  height: 100vh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ================= HEADER ================= */
+.app-header {
+  background: linear-gradient(135deg, #0b1120 0%, #1e293b 100%);
+  border-bottom: 1px solid var(--border-color);
+  padding: 10px 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  z-index: 1000;
+  box-shadow: var(--shadow-md);
+  flex-shrink: 0;
+}
+
+.brand-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.brand-icon {
+  width: 42px;
+  height: 42px;
+  background: linear-gradient(135deg, #33ccff 0%, #059669 100%);
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  box-shadow: 0 0 15px rgba(51, 204, 255, 0.4);
+}
+
+.brand-title h1 {
+  font-size: 1.25rem;
+  font-weight: 800;
+  letter-spacing: -0.5px;
+  background: linear-gradient(90deg, #f8fafc, #38bdf8);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.brand-title h1 .badge-sp {
+  font-size: 0.65rem;
+  background: #ef4444;
+  color: #fff;
+  padding: 2px 6px;
+  border-radius: var(--radius-sm);
+  font-weight: 700;
+  -webkit-text-fill-color: #fff;
+}
+
+.brand-title h1 .badge-waze {
+  font-size: 0.62rem;
+  background: #33ccff;
+  color: #0f172a;
+  padding: 2px 6px;
+  border-radius: var(--radius-sm);
+  font-weight: 800;
+  -webkit-text-fill-color: #0f172a;
+}
+
+.brand-subtitle {
+  font-size: 0.76rem;
+  color: var(--text-muted);
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* PERFIL RÁPIDO DO VIAJANTE NO HEADER */
+.driver-profile-pill {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 12px;
+  border-radius: var(--radius-full);
+  font-size: 0.76rem;
+  font-weight: 700;
+  background: rgba(66, 133, 244, 0.12);
+  border: 1px solid rgba(66, 133, 244, 0.3);
+  color: #93c5fd;
+}
+
+/* RODÍZIO STATUS BADGE NO HEADER */
+.rodizio-status-pill {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 12px;
+  border-radius: var(--radius-full);
+  font-size: 0.76rem;
+  font-weight: 700;
+  background: rgba(0, 0, 0, 0.35);
+  border: 1px solid var(--border-color);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.rodizio-status-pill.free {
+  border-color: rgba(34, 197, 94, 0.4);
+  color: #86efac;
+}
+
+.rodizio-status-pill.alert {
+  border-color: rgba(239, 68, 68, 0.5);
+  background: rgba(239, 68, 68, 0.15);
+  color: #fca5a5;
+  animation: pulseAlert 1.5s infinite;
+}
+
+@keyframes pulseAlert {
+  0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4); }
+  70% { box-shadow: 0 0 0 8px rgba(239, 68, 68, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+}
+
+.btn-header {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  color: var(--text-main);
+  padding: 7px 14px;
+  border-radius: var(--radius-md);
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.2s ease;
+}
+
+.btn-header:hover {
+  background: var(--bg-tertiary);
+  border-color: rgba(255, 255, 255, 0.2);
+  transform: translateY(-1px);
+}
+
+.btn-header.primary {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  border: none;
+  color: #fff;
+  box-shadow: 0 0 12px rgba(16, 185, 129, 0.3);
+}
+
+.btn-header.primary:hover {
+  background: linear-gradient(135deg, #059669 0%, #047857 100%);
+}
+
+.btn-header.waze-btn {
+  background: linear-gradient(135deg, #33ccff 0%, #2563eb 100%);
+  color: #fff;
+  border: none;
+}
+
+/* ================= MAIN CONTAINER ================= */
+.main-content {
+  display: flex;
+  flex: 1;
+  position: relative;
+  overflow: hidden;
+}
+
+/* ================= MAP SECTION ================= */
+.map-container {
+  flex: 1;
+  height: 100%;
+  position: relative;
+  background: #e5e3df;
+}
+
+#map {
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+}
+
+/* CONTROLE DE CAMADAS DO GOOGLE MAPS */
+.map-layers-switch {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  z-index: 500;
+  display: flex;
+  background: var(--bg-glass);
+  backdrop-filter: blur(12px);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  box-shadow: var(--shadow-md);
+}
+
+.layer-switch-btn {
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  padding: 6px 12px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  transition: all 0.2s;
+}
+
+.layer-switch-btn:hover {
+  background: var(--bg-tertiary);
+  color: #fff;
+}
+
+.layer-switch-btn.active {
+  background: #4285f4;
+  color: #fff;
+}
+
+/* MAP OVERLAYS */
+.map-floating-panel {
+  position: absolute;
+  top: 14px;
+  left: 14px;
+  z-index: 500;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-width: 440px;
+  width: calc(100% - 28px);
+}
+
+.route-planner-card {
+  background: var(--bg-glass);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  padding: 14px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-color);
+  box-shadow: var(--shadow-lg);
+}
+
+.planner-title {
+  font-size: 0.8rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  color: #38bdf8;
+  letter-spacing: 0.5px;
+  margin-bottom: 10px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.inputs-route-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.input-with-action {
+  display: flex;
+  gap: 6px;
+  position: relative;
+}
+
+.input-with-action input {
+  flex: 1;
+  background: var(--bg-secondary);
+  color: var(--text-main);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  padding: 8px 10px 8px 32px;
+  font-size: 0.85rem;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.input-with-action input:focus {
+  border-color: #4285f4;
+  background: #0f172a;
+}
+
+.input-icon-prefix {
+  position: absolute;
+  left: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 0.85rem;
+  pointer-events: none;
+}
+
+.btn-locate {
+  background: #1e293b;
+  border: 1px solid var(--border-color);
+  color: #38bdf8;
+  padding: 0 10px;
+  border-radius: var(--radius-sm);
+  font-size: 0.75rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-weight: 600;
+  white-space: nowrap;
+  transition: all 0.2s;
+}
+
+.btn-locate:hover {
+  background: #334155;
+  color: #fff;
+  border-color: #38bdf8;
+}
+
+.btn-calc-route {
+  width: 100%;
+  background: linear-gradient(135deg, #4285f4 0%, #10b981 100%);
+  border: none;
+  color: #fff;
+  font-size: 0.84rem;
+  font-weight: 700;
+  padding: 9px 12px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  box-shadow: 0 2px 10px rgba(66, 133, 244, 0.3);
+  transition: all 0.2s;
+}
+
+.btn-calc-route:hover {
+  filter: brightness(1.1);
+  transform: translateY(-1px);
+}
+
+/* SELETOR DE ESTRATÉGIAS DE ROTAS SUGERIDAS */
+.route-strategies-selector {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 6px;
+  margin-top: 10px;
+}
+
+.strategy-btn {
+  background: rgba(15, 23, 42, 0.75);
+  border: 2px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  padding: 8px 4px;
+  cursor: pointer;
+  text-align: center;
+  transition: all 0.2s;
+  color: var(--text-muted);
+}
+
+.strategy-btn:hover {
+  background: var(--bg-tertiary);
+  color: #fff;
+}
+
+.strategy-btn.active {
+  border-color: var(--color-gas);
+  background: rgba(16, 185, 129, 0.2);
+  color: #86efac;
+  font-weight: 800;
+  transform: scale(1.02);
+}
+
+.strategy-btn.active.eco {
+  border-color: var(--color-eco);
+  background: rgba(34, 197, 94, 0.2);
+  color: #4ade80;
+  font-weight: 800;
+}
+
+.strategy-btn.active.fast {
+  border-color: #38bdf8;
+  background: rgba(56, 189, 248, 0.2);
+  color: #7dd3fc;
+  font-weight: 800;
+}
+
+.strategy-label {
+  font-size: 0.72rem;
+  display: block;
+}
+
+.strategy-sub {
+  font-size: 0.65rem;
+  opacity: 0.85;
+}
+
+/* FILTROS DE CATEGORIA */
+.category-filter-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  margin-top: 8px;
+}
+
+.filter-chip {
+  background: rgba(15, 23, 42, 0.7);
+  border: 1px solid var(--border-color);
+  color: var(--text-muted);
+  font-size: 0.7rem;
+  padding: 4px 8px;
+  border-radius: var(--radius-full);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  transition: all 0.15s ease;
+  user-select: none;
+}
+
+.filter-chip:hover {
+  background: var(--bg-tertiary);
+  color: var(--text-main);
+}
+
+.filter-chip.active {
+  background: rgba(255, 255, 255, 0.14);
+  color: #fff;
+  border-color: rgba(255, 255, 255, 0.3);
+  font-weight: 700;
+}
+
+.filter-chip.active.toll { border-color: var(--color-toll); color: #fca5a5; }
+.filter-chip.active.radar { border-color: var(--color-radar); color: #fde68a; }
+.filter-chip.active.gas { border-color: var(--color-gas); color: #86efac; }
+.filter-chip.active.waze { border-color: var(--color-cyan); color: #7dd3fc; background: rgba(6, 182, 212, 0.15); }
+
+/* MAP HUD / SIMULATION CONTROLS */
+.hud-simulation-card {
+  position: absolute;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 500;
+  background: var(--bg-glass);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  padding: 12px 20px;
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border-glow);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
+  display: none;
+  align-items: center;
+  gap: 20px;
+  min-width: 460px;
+  animation: slideUp 0.3s ease-out;
+}
+
+.hud-simulation-card.active {
+  display: flex;
+}
+
+@keyframes slideUp {
+  from { opacity: 0; transform: translate(-50%, 20px); }
+  to { opacity: 1; transform: translate(-50%, 0); }
+}
+
+.hud-speedometer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  border-right: 1px solid var(--border-color);
+  padding-right: 15px;
+}
+
+.speed-value {
+  font-size: 1.8rem;
+  font-weight: 900;
+  font-family: monospace;
+  color: var(--accent-gold);
+}
+
+.speed-unit {
+  font-size: 0.65rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+}
+
+.hud-info {
+  flex: 1;
+}
+
+.hud-next-alert {
+  font-size: 0.85rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+
+.hud-next-alert.radar { color: var(--color-radar); }
+.hud-next-alert.toll { color: var(--color-toll); }
+.hud-next-alert.good { color: var(--color-gas); }
+.hud-next-alert.waze { color: #f43f5e; font-weight: 800; }
+
+.hud-desc {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+.hud-controls {
+  display: flex;
+  gap: 8px;
+}
+
+.btn-hud {
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border-color);
+  color: #fff;
+  padding: 8px 12px;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  font-size: 0.8rem;
+  font-weight: 600;
+  transition: background 0.15s;
+}
+
+.btn-hud:hover {
+  background: #475569;
+}
+
+/* ================= SIDEBAR ================= */
+.app-sidebar {
+  width: 490px;
+  background: var(--bg-secondary);
+  border-left: 1px solid var(--border-color);
+  display: flex;
+  flex-direction: column;
+  z-index: 600;
+  box-shadow: -5px 0 25px rgba(0, 0, 0, 0.4);
+  transition: transform 0.3s ease;
+}
+
+.sidebar-tabs {
+  display: flex;
+  background: rgba(15, 23, 42, 0.8);
+  border-bottom: 1px solid var(--border-color);
+  padding: 4px;
+  flex-shrink: 0;
+}
+
+.tab-btn {
+  flex: 1;
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  padding: 10px 4px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+  border-radius: var(--radius-sm);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  transition: all 0.2s ease;
+}
+
+.tab-btn:hover {
+  color: var(--text-main);
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.tab-btn.active {
+  color: #fff;
+  background: var(--bg-tertiary);
+  box-shadow: var(--shadow-sm);
+}
+
+.tab-btn .tab-badge {
+  font-size: 0.65rem;
+  padding: 1px 6px;
+  border-radius: var(--radius-full);
+  background: rgba(255, 255, 255, 0.1);
+  color: var(--text-muted);
+}
+
+.sidebar-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.sidebar-content::-webkit-scrollbar {
+  width: 6px;
+}
+.sidebar-content::-webkit-scrollbar-track {
+  background: var(--bg-secondary);
+}
+.sidebar-content::-webkit-scrollbar-thumb {
+  background: var(--bg-tertiary);
+  border-radius: var(--radius-full);
+}
+
+/* ================= TAB 1: PONTOS ================= */
+.search-box {
+  position: relative;
+  margin-bottom: 10px;
+}
+
+.search-box input {
+  width: 100%;
+  background: var(--bg-primary);
+  border: 1px solid var(--border-color);
+  color: var(--text-main);
+  border-radius: var(--radius-md);
+  padding: 10px 14px 10px 36px;
+  font-size: 0.85rem;
+  outline: none;
+}
+
+.search-box input:focus {
+  border-color: var(--color-gas);
+}
+
+.search-icon {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--text-dim);
+  font-size: 0.9rem;
+}
+
+.points-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.point-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  padding: 12px 14px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.point-card::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 4px;
+  height: 100%;
+}
+
+.point-card.cat-toll::before { background: var(--color-toll); }
+.point-card.cat-radar::before { background: var(--color-radar); }
+.point-card.cat-gas::before { background: var(--color-gas); }
+.point-card.cat-food::before { background: var(--color-food); }
+.point-card.cat-rest::before { background: var(--color-rest); }
+.point-card.cat-waze_hazard::before { background: var(--waze-hazard); }
+.point-card.cat-waze_jam::before { background: var(--waze-jam); }
+.point-card.cat-waze_works::before { background: var(--waze-works); }
+.point-card.cat-waze_police::before { background: var(--waze-police); }
+
+.point-card:hover {
+  background: var(--bg-tertiary);
+  transform: translateX(3px);
+  border-color: rgba(255, 255, 255, 0.15);
+}
+
+.point-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 6px;
+}
+
+.point-title {
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: var(--text-main);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.point-highway {
+  font-size: 0.68rem;
+  padding: 2px 7px;
+  border-radius: var(--radius-sm);
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--text-muted);
+  font-weight: 600;
+}
+
+.point-meta {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 0.74rem;
+  color: var(--text-muted);
+  margin-bottom: 6px;
+}
+
+.point-desc {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  line-height: 1.4;
+  margin-bottom: 8px;
+}
+
+.point-economy-tip {
+  background: rgba(16, 185, 129, 0.1);
+  border: 1px dashed rgba(16, 185, 129, 0.3);
+  padding: 6px 10px;
+  border-radius: var(--radius-sm);
+  font-size: 0.74rem;
+  color: #a7f3d0;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.point-danger-tip {
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px dashed rgba(239, 68, 68, 0.3);
+  padding: 6px 10px;
+  border-radius: var(--radius-sm);
+  font-size: 0.74rem;
+  color: #fca5a5;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.point-waze-tip {
+  background: rgba(225, 29, 72, 0.12);
+  border: 1px dashed rgba(225, 29, 72, 0.4);
+  padding: 6px 10px;
+  border-radius: var(--radius-sm);
+  font-size: 0.74rem;
+  color: #fda4af;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.point-price-tag {
+  font-size: 0.76rem;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: var(--radius-full);
+}
+
+.point-price-tag.toll { background: rgba(239, 68, 68, 0.2); color: #f87171; }
+.point-price-tag.cheap { background: rgba(16, 185, 129, 0.2); color: #34d399; }
+.point-price-tag.fine { background: rgba(245, 158, 11, 0.2); color: #fbbf24; }
+.point-price-tag.waze { background: rgba(244, 63, 94, 0.2); color: #fb7185; }
+
+/* ================= TAB 2: CONSULTA DE PLACA & DADOS DO VEÍCULO ================= */
+.calc-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  padding: 16px;
+}
+
+.calc-title {
+  font-size: 1rem;
+  font-weight: 700;
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #38bdf8;
+}
+
+.form-group {
+  margin-bottom: 12px;
+}
+
+.form-label {
+  display: block;
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  margin-bottom: 5px;
+  font-weight: 600;
+}
+
+.form-row {
+  display: flex;
+  gap: 10px;
+}
+
+.form-control {
+  width: 100%;
+  background: var(--bg-primary);
+  border: 1px solid var(--border-color);
+  color: var(--text-main);
+  border-radius: var(--radius-sm);
+  padding: 8px 12px;
+  font-size: 0.85rem;
+  outline: none;
+}
+
+.form-control:focus {
+  border-color: #4285f4;
+}
+
+/* CARD VISUAL DA PLACA MERCOSUL */
+.plate-mercosul-card {
+  background: #ffffff;
+  color: #000;
+  border-radius: var(--radius-sm);
+  border: 3px solid #000;
+  width: 190px;
+  margin: 0 auto 12px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+  overflow: hidden;
+  text-align: center;
+}
+
+.plate-header-blue {
+  background: #003399;
+  color: #fff;
+  font-size: 0.65rem;
+  font-weight: 900;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 2px 8px;
+  letter-spacing: 1px;
+}
+
+.plate-number-display {
+  font-size: 1.55rem;
+  font-weight: 900;
+  font-family: monospace, sans-serif;
+  letter-spacing: 2px;
+  padding: 4px 0;
+  color: #111;
+}
+
+/* CARD DE DADOS DO VEÍCULO CONSULTADO */
+.vehicle-consult-result {
+  background: linear-gradient(135deg, rgba(66, 133, 244, 0.1) 0%, rgba(16, 185, 129, 0.08) 100%);
+  border: 1px solid rgba(66, 133, 244, 0.3);
+  border-radius: var(--radius-md);
+  padding: 12px;
+  margin-bottom: 14px;
+}
+
+.vehicle-data-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-bottom: 8px;
+  font-size: 0.78rem;
+}
+
+.vehicle-data-item strong {
+  display: block;
+  font-size: 0.68rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+}
+
+.vehicle-data-item span {
+  color: #fff;
+  font-weight: 700;
+}
+
+.lgpd-security-badge {
+  background: rgba(34, 197, 94, 0.12);
+  border: 1px solid rgba(34, 197, 94, 0.3);
+  color: #86efac;
+  padding: 5px 8px;
+  border-radius: var(--radius-sm);
+  font-size: 0.7rem;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* RODÍZIO CARD & ALERTA */
+.rodizio-checker-box {
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  padding: 10px 12px;
+  margin-bottom: 14px;
+}
+
+.rodizio-checker-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+  gap: 8px;
+}
+
+.rodizio-checker-title {
+  font-size: 0.76rem;
+  font-weight: 700;
+  color: var(--text-main);
+}
+
+.rodizio-checker-result {
+  font-size: 0.78rem;
+  padding: 6px 10px;
+  border-radius: var(--radius-sm);
+  line-height: 1.4;
+}
+
+.rodizio-checker-result.free {
+  background: rgba(34, 197, 94, 0.15);
+  border: 1px solid rgba(34, 197, 94, 0.3);
+  color: #86efac;
+}
+
+.rodizio-checker-result.restricted {
+  background: rgba(239, 68, 68, 0.15);
+  border: 1px solid rgba(239, 68, 68, 0.4);
+  color: #fca5a5;
+  font-weight: 600;
+}
+
+/* CALCULATOR RESULTS GRID */
+.calc-results {
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.08) 0%, rgba(6, 182, 212, 0.08) 100%);
+  border: 1px solid var(--border-glow);
+  border-radius: var(--radius-md);
+  padding: 16px;
+  margin-top: 14px;
+}
+
+.calc-summary-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.calc-summary-item {
+  background: rgba(0, 0, 0, 0.25);
+  padding: 10px;
+  border-radius: var(--radius-sm);
+}
+
+.calc-summary-label {
+  font-size: 0.68rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+}
+
+.calc-summary-val {
+  font-size: 1.05rem;
+  font-weight: 800;
+  margin-top: 2px;
+}
+
+.calc-summary-val.danger { color: var(--color-toll); }
+.calc-summary-val.success { color: var(--color-gas); }
+.calc-summary-val.gold { color: var(--accent-gold); }
+.calc-summary-val.eco { color: var(--color-eco); }
+
+.carbon-badge-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: rgba(34, 197, 94, 0.12);
+  border: 1px solid rgba(34, 197, 94, 0.3);
+  padding: 8px 12px;
+  border-radius: var(--radius-sm);
+  margin-bottom: 12px;
+  font-size: 0.78rem;
+  color: #a7f3d0;
+}
+
+.carbon-badge-row strong {
+  color: #fff;
+  font-size: 0.85rem;
+}
+
+.route-comparison-box {
+  background: rgba(0, 0, 0, 0.35);
+  border-radius: var(--radius-sm);
+  padding: 12px;
+  font-size: 0.8rem;
+  line-height: 1.45;
+}
+
+.btn-open-gmaps {
+  width: 100%;
+  margin-top: 10px;
+  background: #4285f4;
+  color: #fff;
+  border: none;
+  padding: 9px 12px;
+  border-radius: var(--radius-sm);
+  font-size: 0.8rem;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  text-decoration: none;
+  transition: background 0.2s;
+}
+
+.btn-open-gmaps:hover {
+  background: #2563eb;
+}
+
+/* ================= POPUP CUSTOMIZADA LEAFLET ================= */
+.leaflet-popup-content-wrapper {
+  background: var(--bg-secondary) !important;
+  color: var(--text-main) !important;
+  border: 1px solid var(--border-color) !important;
+  border-radius: var(--radius-md) !important;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6) !important;
+  padding: 0 !important;
+}
+
+.leaflet-popup-content {
+  margin: 14px !important;
+  line-height: 1.4 !important;
+}
+
+.leaflet-popup-tip {
+  background: var(--bg-secondary) !important;
+}
+
+.popup-custom-card h3 {
+  font-size: 0.95rem;
+  font-weight: 700;
+  margin-bottom: 4px;
+  color: #fff;
+}
+
+.popup-tag {
+  display: inline-block;
+  font-size: 0.68rem;
+  padding: 2px 7px;
+  border-radius: var(--radius-sm);
+  margin-bottom: 8px;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.popup-tag.toll { background: var(--color-toll); color: #fff; }
+.popup-tag.radar { background: var(--color-radar); color: #1e293b; }
+.popup-tag.gas { background: var(--color-gas); color: #0f172a; }
+.popup-tag.waze { background: #e11d48; color: #fff; }
+
+.popup-body {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  margin-bottom: 8px;
+}
+
+.popup-highlight {
+  background: rgba(0, 0, 0, 0.3);
+  padding: 6px 8px;
+  border-radius: var(--radius-sm);
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #38bdf8;
+  margin-bottom: 8px;
+}
+
+/* ================= MODAL ================= */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.75);
+  backdrop-filter: blur(8px);
+  z-index: 2000;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.modal-overlay.active {
+  display: flex;
+}
+
+.modal-dialog {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  max-width: 650px;
+  width: 100%;
+  max-height: 85vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  box-shadow: var(--shadow-lg);
+}
+
+.modal-header {
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--border-color);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.modal-header h3 {
+  font-size: 1.1rem;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.btn-modal-close {
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  font-size: 1.5rem;
+  cursor: pointer;
+  line-height: 1;
+}
+
+.btn-modal-close:hover {
+  color: #fff;
+}
+
+.modal-body {
+  padding: 20px;
+  overflow-y: auto;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  line-height: 1.5;
+}
+
+/* ================= BOTÃO DE CONSULTA DE PLACA ================= */
+.btn-search-plate {
+  background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+  color: #fff;
+  border: none;
+  border-radius: var(--radius-sm);
+  padding: 8px 12px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+.btn-search-plate:hover {
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  transform: translateY(-1px);
+}
+
+/* ================= BARRA DE MONITORAMENTO WAZE NO TRAJETO ================= */
+.route-waze-bar {
+  background: linear-gradient(135deg, rgba(225, 29, 72, 0.12) 0%, rgba(249, 115, 22, 0.08) 100%);
+  border: 1px solid rgba(225, 29, 72, 0.35);
+  border-radius: var(--radius-sm);
+  padding: 8px 10px;
+  margin-top: 8px;
+  transition: all 0.3s ease;
+}
+.route-waze-bar.safe {
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.12) 0%, rgba(6, 182, 212, 0.08) 100%);
+  border-color: rgba(16, 185, 129, 0.35);
+}
+.waze-bar-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+.waze-bar-title-wrap {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.78rem;
+}
+.waze-live-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #f43f5e;
+  box-shadow: 0 0 8px #f43f5e;
+  animation: pulse-dot 1.5s infinite;
+}
+.route-waze-bar.safe .waze-live-dot {
+  background: #10b981;
+  box-shadow: 0 0 8px #10b981;
+}
+@keyframes pulse-dot {
+  0% { transform: scale(0.9); opacity: 0.7; }
+  50% { transform: scale(1.3); opacity: 1; }
+  100% { transform: scale(0.9); opacity: 0.7; }
+}
+.btn-waze-expand {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: #fff;
+  font-size: 0.7rem;
+  padding: 3px 8px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.btn-waze-expand:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+.waze-bar-details {
+  display: none;
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px dashed rgba(255, 255, 255, 0.15);
+  font-size: 0.75rem;
+  color: #cbd5e1;
+}
+.waze-bar-details.active {
+  display: block;
+}
+.waze-alert-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: rgba(0, 0, 0, 0.3);
+  padding: 3px 8px;
+  border-radius: 4px;
+  margin: 3px 4px 3px 0;
+  font-size: 0.73rem;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+.waze-alert-pill.hazard { border-color: rgba(225, 29, 72, 0.5); color: #fda4af; }
+.waze-alert-pill.jam { border-color: rgba(249, 115, 22, 0.5); color: #fed7aa; }
+.waze-alert-pill.works { border-color: rgba(234, 179, 8, 0.5); color: #fef08a; }
+.waze-alert-pill.police { border-color: rgba(59, 130, 246, 0.5); color: #93c5fd; }
+.waze-alert-pill.weather { border-color: rgba(6, 182, 212, 0.5); color: #a5f3fc; }
+
+.filter-chip.onroute {
+  border-color: #38bdf8;
+  color: #38bdf8;
+}
+.filter-chip.active.onroute {
+  background: #38bdf8;
+  color: #0f172a;
+  font-weight: 800;
+}
+
+/* ================= RESPONSIVIDADE ================= */
+@media (max-width: 900px) {
+  body {
+    overflow: auto;
+    height: auto;
+  }
+  
+  .main-content {
+    flex-direction: column;
+    height: auto;
+  }
+
+  .map-container {
+    height: 52vh;
+    min-height: 360px;
+  }
+
+  .app-sidebar {
+    width: 100%;
+    height: auto;
+    max-height: none;
+    box-shadow: none;
+  }
+
+  .hud-simulation-card {
+    min-width: 90%;
+    bottom: 10px;
+    padding: 10px;
+  }
+  
+  .driver-profile-pill {
+    display: none;
+  }
+}

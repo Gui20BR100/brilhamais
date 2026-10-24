@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FugaDoGasto SP v7.0 - Rotas pelas Ruas & Alertas Waze</title>
+  
+  <!-- Estilos Leaflet Map -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+  
+  <!-- Estilos Principais -->
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- ================= CABEÇALHO SUPERIOR ================= -->
+  <header class="app-header">
+    <div class="brand-wrapper">
+      <div class="brand-icon">🗺️</div>
+      <div class="brand-title">
+        <h1>FugaDoGasto <span class="badge-sp">SP</span> <span class="badge-waze">Waze & OSM</span></h1>
+        <div class="brand-subtitle">Rotas contextualmente diferentes: Menor custo vs Expressa vs Eco + Alertas de Assaltos, Trânsito e Obras</div>
+      </div>
+    </div>
+
+    <!-- Perfil Dinâmico do Motorista no Header -->
+    <div id="headerDriverPill" class="driver-profile-pill" title="Seu perfil de viagem">
+      👤 <strong>Viajante</strong> • Renault Kwid 1.0 (BRA2E19)
+    </div>
+
+    <!-- Indicador Dinâmico de Rodízio de SP -->
+    <div id="headerRodizioPill" class="rodizio-status-pill free" title="Verificar restrição de circulação no centro expandido de SP">
+      <span>🟢</span> Verificando Rodízio...
+    </div>
+
+    <!-- Métricas rápidas no header -->
+    <div class="quick-stats-bar">
+      <div class="stat-item danger">
+        <span>💸</span>
+        <strong id="statTollsCount">15 Pedágios</strong>
+      </div>
+      <div class="stat-item radar">
+        <span>🚨</span>
+        <strong id="statRadarsCount">11 Radares</strong>
+      </div>
+      <div class="stat-item" style="color:#f43f5e;">
+        <span>⚠️</span>
+        <strong id="statWazeCount">16 Alertas Waze</strong>
+      </div>
+    </div>
+
+    <!-- Botões de Ação do Header -->
+    <div class="header-actions">
+      <button id="btnReportWaze" class="btn-header waze-btn" title="Reportar perigo, trânsito ou blitz">
+        ➕ Reportar (Waze)
+      </button>
+      <button id="btnToggleAudio" class="btn-header" title="Ativar ou desativar alertas sonoros">
+        🔊 Som: Ativo
+      </button>
+      <button id="btnToggleSim" class="btn-header primary" title="Iniciar simulação da viagem pelas ruas">
+        🚗 Simular Viagem
+      </button>
+      <button id="btnOpenManual" class="btn-header" title="Ver dicas de sobrevivência e evitar multas">
+        📖 Manual Anti-Multa
+      </button>
+    </div>
+  </header>
+
+  <!-- ================= CORPO PRINCIPAL ================= -->
+  <main class="main-content">
+    
+    <!-- ÁREA DO MAPA GOOGLE INTERATIVO -->
+    <section class="map-container">
+      <div id="map"></div>
+
+      <!-- SELETOR DE CAMADAS DO GOOGLE MAPS -->
+      <div class="map-layers-switch">
+        <button class="layer-switch-btn active" data-layer="roadmap" title="Google Maps modo ruas e rodovias">
+          🗺️ Ruas
+        </button>
+        <button class="layer-switch-btn" data-layer="hybrid" title="Google Maps modo satélite com nomes de ruas">
+          🛰️ Satélite
+        </button>
+        <button class="layer-switch-btn" data-layer="terrain" title="Google Maps modo relevo e serras">
+          ⛰️ Relevo
+        </button>
+      </div>
+
+      <!-- PAINEL FLUTUANTE: DIGITE ORIGEM E DESTINO LIVREMENTE -->
+      <div class="map-floating-panel">
+        <div class="route-planner-card">
+          <div class="planner-title">
+            <span>🛣️ Rotas Contextuais Inteligentes</span>
+          </div>
+
+          <div class="inputs-route-group">
+            <!-- Origem digitada livremente pelo usuário -->
+            <div class="input-with-action">
+              <span class="input-icon-prefix">📍</span>
+              <input type="text" id="originInput" value="São Paulo, SP" placeholder="Digite endereço de partida (ex: Av. Paulista)...">
+              <button id="btnLocateMe" class="btn-locate" title="Usar minha localização GPS atual">
+                📍 Meu GPS
+              </button>
+            </div>
+
+            <!-- Destino digitado livremente pelo usuário -->
+            <div class="input-with-action">
+              <span class="input-icon-prefix">🏁</span>
+              <input type="text" id="destInput" value="Caraguatatuba, SP" placeholder="Digite seu destino fora de SP (ex: Ubatuba, Santos, Sorocaba)...">
+            </div>
+
+            <!-- Botão de Traçar Rota pelas Ruas -->
+            <button id="btnCalcRoute" class="btn-calc-route">
+              <span>🛣️</span> Traçar Rotas pelas Ruas
+            </button>
+          </div>
+
+          <!-- Sugestão de 3 Estratégias de Rotas VISUALMENTE DIFERENTES -->
+          <div class="route-strategies-selector">
+            <button class="strategy-btn active" data-strategy="economy" title="Fuga total de pedágios caros e postos baratos">
+              <span class="strategy-label">💰 Econômica</span>
+              <span class="strategy-sub">Fuga de Pedágio</span>
+            </button>
+            <button class="strategy-btn fast" data-strategy="fast" title="Autoestradas de pista dupla/tripla com pedágio">
+              <span class="strategy-label">⚡ Expressa</span>
+              <span class="strategy-sub">Pista Rápida</span>
+            </button>
+            <button class="strategy-btn eco" data-strategy="eco" title="Cruzeiro constante e mínima emissão de carbono">
+              <span class="strategy-label">🍃 Eco-Carbono</span>
+              <span class="strategy-sub">Menos CO2</span>
+            </button>
+          </div>
+
+          <!-- BARRA DE MONITORAMENTO WAZE NO TRAJETO ATUAL -->
+          <div id="routeWazeAlertsBar" class="route-waze-bar" title="Alertas de perigo, lentidão e obras no seu trajeto">
+            <div class="waze-bar-header">
+              <div class="waze-bar-title-wrap">
+                <span class="waze-live-dot"></span>
+                <span class="waze-icon">⚠️</span>
+                <strong id="wazeRouteTitle">Waze na Rota:</strong>
+                <span id="wazeRouteStats">Calculando incidentes...</span>
+              </div>
+              <button id="btnToggleWazeList" class="btn-waze-expand" title="Ver detalhes dos alertas">Ver Alertas</button>
+            </div>
+            <div id="wazeRouteDetails" class="waze-bar-details">
+              <!-- Inserido dinamicamente via JS -->
+            </div>
+          </div>
+
+          <!-- Filtros de categoria por chips -->
+          <div class="category-filter-chips">
+            <div class="filter-chip active" data-category="all">Todos</div>
+            <div class="filter-chip onroute" data-category="route">🛣️ No Trajeto</div>
+            <div class="filter-chip toll" data-category="toll">💸 Pedágios</div>
+            <div class="filter-chip radar" data-category="radar">🚨 Radares</div>
+            <div class="filter-chip waze" data-category="waze">⚠️ Waze Alertas</div>
+            <div class="filter-chip gas" data-category="gas">⛽ Postos Baratos</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- HUD FLUTUANTE DO MODO SIMULAÇÃO DE VIAGEM -->
+      <div id="hudSimulationCard" class="hud-simulation-card">
+        <div class="hud-speedometer">
+          <div id="hudSpeedValue" class="speed-value">90</div>
+          <div class="speed-unit">KM/H</div>
+        </div>
+        <div class="hud-info">
+          <div id="hudAlertText" class="hud-next-alert good">🛣️ Rota Segura</div>
+          <div id="hudDescText" class="hud-desc">Rodando no traçado real com alertas Waze em tempo real.</div>
+        </div>
+        <div class="hud-controls">
+          <button id="btnHudStop" class="btn-hud" title="Encerrar simulação">Encerrar</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- PAINEL LATERAL INFORMATIVO (SIDEBAR COM ABAS) -->
+    <aside class="app-sidebar">
+      <nav class="sidebar-tabs">
+        <button class="tab-btn active" data-tab="points">
+          <span>📍 Pontos & Waze</span>
+          <span class="tab-badge">Mapeados</span>
+        </button>
+        <button class="tab-btn" data-tab="calc">
+          <span>🚗 Seu Carro</span>
+          <span class="tab-badge">Perfil</span>
+        </button>
+        <button class="tab-btn" data-tab="tips">
+          <span>🛡️ Rodízio & Multas</span>
+          <span class="tab-badge">Dicas</span>
+        </button>
+      </nav>
+
+      <div class="sidebar-content">
+        
+        <!-- ABA 1: LISTAGEM DE PONTOS, RADARES, PEDÁGIOS E ALERTAS WAZE -->
+        <div id="tab-points" class="tab-pane">
+          <div class="search-box">
+            <span class="search-icon">🔍</span>
+            <input type="text" id="searchPointsInput" placeholder="Buscar por assalto, trânsito, obras, radar ou pedágio...">
+          </div>
+
+          <div id="pointsList" class="points-list">
+            <!-- Gerado dinamicamente via JS -->
+          </div>
+        </div>
+
+        <!-- ABA 2: DADOS DIGITADOS: NOME, MARCA, MODELO, PLACA, CONSUMO & CARBONO -->
+        <div id="tab-calc" class="tab-pane" style="display: none;">
+          <div class="calc-card">
+            <h3 class="calc-title">👤 Perfil do Motorista & Veículo</h3>
+            
+            <!-- NOME DO MOTORISTA DIGITADO -->
+            <div class="form-group">
+              <label class="form-label">Seu Nome / Motorista:</label>
+              <input type="text" id="driverNameInput" class="form-control" value="Viajante" placeholder="Digite seu nome (ex: Carlos, Guilherme)">
+            </div>
+
+            <!-- MARCA E MODELO DIGITADOS COM SUGESTÕES -->
+            <div class="form-row">
+              <div class="form-group" style="flex:1;">
+                <label class="form-label">Marca do Carro:</label>
+                <input type="text" id="carBrandInput" list="carBrandsList" class="form-control" value="Renault" placeholder="Ex: Chevrolet, VW, Fiat">
+                <datalist id="carBrandsList">
+                  <option value="Chevrolet">
+                  <option value="Volkswagen">
+                  <option value="Fiat">
+                  <option value="Toyota">
+                  <option value="Renault">
+                  <option value="Hyundai">
+                  <option value="Honda">
+                  <option value="Ford">
+                  <option value="Nissan">
+                  <option value="Jeep">
+                  <option value="Moto Honda">
+                  <option value="Moto Yamaha">
+                </datalist>
+              </div>
+
+              <div class="form-group" style="flex:1;">
+                <label class="form-label">Modelo e Versão:</label>
+                <input type="text" id="carModelInput" list="carModelsList" class="form-control" value="Kwid 1.0" placeholder="Ex: Onix 1.0, Gol, HB20">
+                <datalist id="carModelsList">
+                  <option value="Onix 1.0">
+                  <option value="Kwid 1.0">
+                  <option value="Mobi 1.0">
+                  <option value="HB20 1.0">
+                  <option value="Polo Track 1.0">
+                  <option value="Gol 1.6">
+                  <option value="Corolla Híbrido">
+                  <option value="Civic 2.0">
+                  <option value="T-Cross 1.0 TSI">
+                  <option value="Renegade 1.3 Turbo">
+                  <option value="Uno Mille">
+                  <option value="CG 160 Titan">
+                </datalist>
+              </div>
+            </div>
+
+            <!-- CARD VISUAL DA PLACA MERCOSUL -->
+            <div class="plate-mercosul-card" id="plateMercosulCard" title="Placa Mercosul Ativa">
+              <div class="plate-header-blue">
+                <span>BRASIL</span>
+                <span style="font-size:0.55rem; font-weight:700;">MERCOSUL</span>
+              </div>
+              <div class="plate-number-display" id="mercosulPlateNumber">
+                BRA-2E19
+              </div>
+            </div>
+
+            <!-- NÚMERO DA PLACA DIGITADO COM CONSULTA AUTOMÁTICA -->
+            <div class="rodizio-checker-box">
+              <div class="rodizio-checker-header">
+                <span class="rodizio-checker-title">🚗 Placa do Carro (Puxar Modelo):</span>
+                <div style="display:flex; gap:6px; align-items:center;">
+                  <input type="text" id="licensePlateInput" class="form-control" style="width:115px; text-transform:uppercase; font-weight:700; text-align:center;" value="BRA2E19" placeholder="Ex: BRA2E19" maxlength="8">
+                  <button id="btnSearchPlate" class="btn-search-plate" type="button" title="Puxar dados do modelo pela placa">🔍 Puxar</button>
+                </div>
+              </div>
+              <div id="rodizioResultBox" class="rodizio-checker-result free">
+                <!-- Diagnóstico de rodízio em tempo real -->
+              </div>
+            </div>
+
+            <!-- CARD DE DADOS DO VEÍCULO CONSULTADO (SEM CHASSI NEM RENAVAM!) -->
+            <div id="vehicleConsultResult" class="vehicle-consult-result">
+              <!-- Gerado dinamicamente via JS com dados do modelo sem expor chassi -->
+            </div>
+
+            <div id="vehiclePresetInfo" class="vehicle-preset-info">
+              <!-- Resumo inteligente de motorização e consumo -->
+            </div>
+
+            <!-- PARÂMETROS DE COMBUSTÍVEL -->
+            <div class="form-group" style="margin-top:10px;">
+              <label class="form-label">Combustível Utilizado:</label>
+              <select id="calcFuelType" class="form-control">
+                <option value="ethanol" selected>Etanol (Ecológico - Menor Emissão de Carbono)</option>
+                <option value="gasoline">Gasolina Comum</option>
+              </select>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group" style="flex:1;">
+                <label class="form-label">Consumo Estrada (km/L):</label>
+                <input type="number" id="calcEfficiency" class="form-control" value="10.8" step="0.1" min="4" max="50">
+              </div>
+              <div class="form-group" style="flex:1;">
+                <label class="form-label">Preço por Litro (R$):</label>
+                <input type="number" id="calcFuelPrice" class="form-control" value="3.49" step="0.05" min="2" max="10">
+              </div>
+            </div>
+
+            <!-- RESULTADOS DETALHADOS -->
+            <div class="calc-results">
+              
+              <!-- INDICADOR DE EMISSÃO DE CARBONO -->
+              <div class="carbon-badge-row">
+                <span>🍃 Emissão Estimada de Carbono:</span>
+                <div id="carbonFootprintValue"><strong>0.0 kg CO2</strong></div>
+              </div>
+
+              <div class="calc-summary-grid">
+                <div class="calc-summary-item">
+                  <div class="calc-summary-label">Distância da Rota</div>
+                  <div id="calcDistanceDisplay" class="calc-summary-val gold">165 km (155 min)</div>
+                </div>
+                <div class="calc-summary-item">
+                  <div class="calc-summary-label">Custo Combustível</div>
+                  <div id="calcFuelCostDisplay" class="calc-summary-val success">R$ 53,30</div>
+                </div>
+                <div class="calc-summary-item">
+                  <div class="calc-summary-label">Pedágios Desta Rota</div>
+                  <div id="calcTollsDisplay" class="calc-summary-val danger">R$ 5,60</div>
+                </div>
+                <div class="calc-summary-item">
+                  <div class="calc-summary-label">Custo Total da Ida</div>
+                  <div id="calcTotalDisplay" class="calc-summary-val" style="color:#38bdf8;">R$ 58,90</div>
+                </div>
+              </div>
+
+              <div id="calcEconomyTips" class="route-comparison-box">
+                <!-- Informações comparativas e economia da rota inseridos via JS -->
+              </div>
+
+              <!-- BOTÃO ABRIR NO GOOGLE MAPS -->
+              <a id="btnOpenGmapsExternal" href="#" target="_blank" class="btn-open-gmaps">
+                <span>🗺️</span> Abrir Rota no Google Maps Oficial
+              </a>
+            </div>
+          </div>
+        </div>
+
+        <!-- ABA 3: DICAS ANTI-MULTA, RODÍZIO & RADARES -->
+        <div id="tab-tips" class="tab-pane" style="display: none;">
+          <div class="tips-container">
+            
+            <div class="tip-banner">
+              <h4>🚨 Dicas de Segurança Waze & Anti-Multa</h4>
+              <p>Evite prejuízos e incidentes na estrada. Siga as orientações comunitárias:</p>
+            </div>
+
+            <div class="guide-step-card">
+              <div class="guide-step-title">⚠️ 1. Áreas de Risco e Arrastão Noturno</div>
+              <p class="guide-step-text">
+                Semáforos de saída das Marginais e início de rodovias (como Ponte das Bandeiras e Tamanduateí) concentram abordagens rápidas. <strong>Nunca deixe bolsas, mochilas ou celular no painel</strong> e evite parar no acostamento deserto.
+              </p>
+            </div>
+
+            <div class="guide-step-card">
+              <div class="guide-step-title">🚗 2. Fuga Real de Pedágio</div>
+              <p class="guide-step-text">
+                Na aba de rotas, a opção <strong>"💰 Econômica"</strong> traça caminhos alternativos que eliminam praças caras (ex: pela Raposo Tavares em vez da Castelo Branco você economiza mais de R$ 20, e pela Mogi-Bertioga economiza até R$ 24 em direção ao litoral norte!).
+              </p>
+            </div>
+
+            <div class="guide-step-card">
+              <div class="guide-step-title">👮 3. Postos da Polícia Rodoviária</div>
+              <p class="guide-step-text">
+                Comandos de fiscalização (Carvalho Pinto km 72, Dutra km 204, Imigrantes km 28) fiscalizam com rigor o uso obrigatório de <strong>faróis acesos</strong> em pistas simples e o estado de conservação dos pneus.
+              </p>
+            </div>
+
+            <div class="guide-step-card">
+              <div class="guide-step-title">🌫️ 4. Serra do Mar e Cantareira com Neblina</div>
+              <p class="guide-step-text">
+                Quando a neblina baixar, <strong>não ligue o pisca-alerta em movimento</strong> (isso confunde motoristas que acham que você está parado). Use faróis baixos ou faróis de neblina e mantenha distância dobrada do carro da frente.
+              </p>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </aside>
+
+  </main>
+
+  <!-- ================= MODAL MANUAL COMPLETO ================= -->
+  <div id="modalManual" class="modal-overlay">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <h3>📖 Manual Completo do Viajante Inteligente de SP</h3>
+        <button id="btnCloseModal" class="btn-modal-close">&times;</button>
+      </div>
+      <div class="modal-body">
+        <h4 style="color:#38bdf8; margin: 8px 0 4px;">1. Planejamento de Partida sem Multas</h4>
+        <p>Verifique o final da sua placa no topo da tela. Se estiver no rodízio hoje, planeje sua saída para antes das 7h da manhã ou após as 10h. Caso precise sair no pico, utilize rotas externas (como o Rodoanel Mário Covas) que estão fora do perímetro restrito.</p>
+        
+        <h4 style="color:#38bdf8; margin: 12px 0 4px;">2. Como Calibrar os Pneus Salva Dinheiro e o Meio Ambiente</h4>
+        <p>Rodar com pneus apenas 4 libras abaixo do recomendado aumenta a resistência ao rolamento, queimando até 5% a mais de combustível e aumentando a emissão de carbono. Calibre com pneus frios ainda na cidade de partida.</p>
+
+        <h4 style="color:#38bdf8; margin: 12px 0 4px;">3. Postos Estratégicos</h4>
+        <p>Nunca abasteça nos primeiros postos de serra ou praias famosas. Cidades como São Bernardo do Campo, Jacareí, Jundiaí e Cotia concentram os postos com maior rotatividade e menor preço por litro do estado.</p>
+
+        <h4 style="color:#38bdf8; margin: 12px 0 4px;">4. Alerta de Free Flow (Pedágio Automático sem Cabine)</h4>
+        <p>Trechos novos contam com câmeras que leem a placa e geram cobrança automática. Caso não tenha tag (Sem Parar / ConectCar), pague pelo site ou app da concessionária em até 15 dias para evitar multa de evasão de pedágio de R$ 195,23.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+  <script src="app.js"></script>
+</body>
+</html>
