@@ -69,31 +69,20 @@
   <!-- ================= CORPO PRINCIPAL ================= -->
   <main class="main-content">
     
-    <!-- ÁREA DO MAPA GOOGLE INTERATIVO -->
-    <section class="map-container">
-      <div id="map"></div>
+    <!-- ÁREA DO MAPA INTERATIVO -->
+    <section class="map-container" id="mapSection">
 
-      <!-- SELETOR DE CAMADAS DO GOOGLE MAPS -->
-      <div class="map-layers-switch">
-        <button class="layer-switch-btn active" data-layer="roadmap" title="Google Maps modo ruas e rodovias">
-          🗺️ Ruas
-        </button>
-        <button class="layer-switch-btn" data-layer="hybrid" title="Google Maps modo satélite com nomes de ruas">
-          🛰️ Satélite
-        </button>
-        <button class="layer-switch-btn" data-layer="terrain" title="Google Maps modo relevo e serras">
-          ⛰️ Relevo
-        </button>
-      </div>
-
-      <!-- PAINEL FLUTUANTE: DIGITE ORIGEM E DESTINO LIVREMENTE -->
-      <div class="map-floating-panel">
+      <!-- PAINEL FLUTUANTE / TOPO MOBILE: DIGITE ORIGEM E DESTINO LIVREMENTE -->
+      <div class="map-floating-panel" id="mapFloatingPanel">
         <div class="route-planner-card">
           <div class="planner-title">
             <span>🛣️ Rotas Contextuais Inteligentes</span>
+            <button id="btnTogglePlanner" class="btn-toggle-planner" type="button" title="Minimizar ou expandir campos de endereço">
+              🔼 Recolher
+            </button>
           </div>
 
-          <div class="inputs-route-group">
+          <div id="plannerInputsCollapse" class="inputs-route-group">
             <!-- Origem digitada livremente pelo usuário -->
             <div class="input-with-action">
               <span class="input-icon-prefix">📍</span>
@@ -159,24 +148,42 @@
         </div>
       </div>
 
-      <!-- HUD FLUTUANTE DO MODO SIMULAÇÃO DE VIAGEM -->
-      <div id="hudSimulationCard" class="hud-simulation-card">
-        <div class="hud-speedometer">
-          <div id="hudSpeedValue" class="speed-value">90</div>
-          <div class="speed-unit">KM/H</div>
+      <!-- ÁREA DO CANVAS DO MAPA E CONTROLES DE CAMADA / HUD -->
+      <div class="map-canvas-wrapper" id="mapCanvasWrapper">
+        <div id="map"></div>
+
+        <!-- SELETOR DE CAMADAS DO MAPA -->
+        <div class="map-layers-switch">
+          <button class="layer-switch-btn active" data-layer="roadmap" title="Modo ruas e rodovias">
+            🗺️ Ruas
+          </button>
+          <button class="layer-switch-btn" data-layer="hybrid" title="Modo satélite com ruas">
+            🛰️ Satélite
+          </button>
+          <button class="layer-switch-btn" data-layer="terrain" title="Modo relevo e serras">
+            ⛰️ Relevo
+          </button>
         </div>
-        <div class="hud-info">
-          <div id="hudAlertText" class="hud-next-alert good">🛣️ Rota Segura</div>
-          <div id="hudDescText" class="hud-desc">Rodando no traçado real com alertas Waze em tempo real.</div>
-        </div>
-        <div class="hud-controls">
-          <button id="btnHudStop" class="btn-hud" title="Encerrar simulação">Encerrar</button>
+
+        <!-- HUD FLUTUANTE DO MODO SIMULAÇÃO DE VIAGEM -->
+        <div id="hudSimulationCard" class="hud-simulation-card">
+          <div class="hud-speedometer">
+            <div id="hudSpeedValue" class="speed-value">90</div>
+            <div class="speed-unit">KM/H</div>
+          </div>
+          <div class="hud-info">
+            <div id="hudAlertText" class="hud-next-alert good">🛣️ Rota Segura</div>
+            <div id="hudDescText" class="hud-desc">Rodando no traçado real com alertas Waze em tempo real.</div>
+          </div>
+          <div class="hud-controls">
+            <button id="btnHudStop" class="btn-hud" title="Encerrar simulação">Encerrar</button>
+          </div>
         </div>
       </div>
     </section>
 
     <!-- PAINEL LATERAL INFORMATIVO (SIDEBAR COM ABAS) -->
-    <aside class="app-sidebar">
+    <aside class="app-sidebar" id="appSidebar">
       <nav class="sidebar-tabs">
         <button class="tab-btn active" data-tab="points">
           <span>📍 Pontos & Waze</span>
@@ -395,6 +402,26 @@
     </aside>
 
   </main>
+
+  <!-- ================= BARRA DE NAVEGAÇÃO INFERIOR PARA CELULAR ================= -->
+  <nav class="mobile-bottom-nav" id="mobileBottomNav" aria-label="Navegação Mobile">
+    <button type="button" class="mobile-nav-btn active" data-mobile-target="map">
+      <span class="mobile-nav-icon">🗺️</span>
+      <span class="mobile-nav-label">Mapa & Rota</span>
+    </button>
+    <button type="button" class="mobile-nav-btn" data-mobile-target="points">
+      <span class="mobile-nav-icon">📍</span>
+      <span class="mobile-nav-label">Alertas Waze</span>
+    </button>
+    <button type="button" class="mobile-nav-btn" data-mobile-target="calc">
+      <span class="mobile-nav-icon">🚗</span>
+      <span class="mobile-nav-label">Meu Carro</span>
+    </button>
+    <button type="button" class="mobile-nav-btn" data-mobile-target="tips">
+      <span class="mobile-nav-icon">🛡️</span>
+      <span class="mobile-nav-label">Rodízio & Dicas</span>
+    </button>
+  </nav>
 
   <!-- ================= MODAL MANUAL COMPLETO ================= -->
   <div id="modalManual" class="modal-overlay">

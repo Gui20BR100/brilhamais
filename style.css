@@ -236,6 +236,15 @@ body {
   height: 100%;
   position: relative;
   background: #e5e3df;
+  display: flex;
+  flex-direction: column;
+}
+
+.map-canvas-wrapper {
+  flex: 1;
+  width: 100%;
+  height: 100%;
+  position: relative;
 }
 
 #map {
@@ -1323,37 +1332,312 @@ body {
   font-weight: 800;
 }
 
-/* ================= RESPONSIVIDADE ================= */
+/* ================= BOTÃO RECOLHER PAINEL E BARRA MOBILE ================= */
+.btn-toggle-planner {
+  background: rgba(56, 189, 248, 0.14);
+  border: 1px solid rgba(56, 189, 248, 0.35);
+  color: #7dd3fc;
+  font-size: 0.7rem;
+  font-weight: 700;
+  padding: 4px 9px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+.btn-toggle-planner:hover {
+  background: rgba(56, 189, 248, 0.25);
+  color: #fff;
+}
+
+.inputs-route-group.collapsed {
+  display: none;
+}
+
+.mobile-bottom-nav {
+  display: none;
+}
+
+/* ================= RESPONSIVIDADE (CELULAR E TABLET) ================= */
 @media (max-width: 900px) {
   body {
-    overflow: auto;
+    overflow-x: hidden;
+    overflow-y: auto;
     height: auto;
+    padding-bottom: 66px; /* Espaço para a barra de navegação inferior */
   }
-  
+
+  /* Header compacto e sem estourar largura */
+  .app-header {
+    flex-wrap: wrap;
+    padding: 10px 12px;
+    gap: 8px;
+  }
+
+  .brand-wrapper {
+    flex: 1 1 auto;
+    min-width: 0;
+    gap: 8px;
+  }
+
+  .brand-icon {
+    width: 34px;
+    height: 34px;
+    font-size: 18px;
+    flex-shrink: 0;
+  }
+
+  .brand-title h1 {
+    font-size: 1.05rem;
+    flex-wrap: wrap;
+    gap: 4px;
+  }
+
+  .brand-subtitle,
+  .driver-profile-pill,
+  .quick-stats-bar {
+    display: none;
+  }
+
+  .rodizio-status-pill {
+    font-size: 0.7rem;
+    padding: 4px 9px;
+    max-width: 100%;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  /* Botões de ação do topo em grade de 4 colunas para toque fácil */
+  .header-actions {
+    width: 100%;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 6px;
+  }
+
+  .btn-header {
+    padding: 7px 4px;
+    font-size: 0.7rem;
+    justify-content: center;
+    text-align: center;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
   .main-content {
     flex-direction: column;
     height: auto;
+    overflow: visible;
   }
 
   .map-container {
-    height: 52vh;
-    min-height: 360px;
+    height: auto;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
   }
 
+  /* No celular, o painel de rota fica encaixado acima do mapa para não cobrir as ruas */
+  .map-floating-panel {
+    position: relative;
+    top: auto;
+    left: auto;
+    width: 100%;
+    max-width: 100%;
+    z-index: 400;
+    background: var(--bg-primary);
+  }
+
+  .route-planner-card {
+    border-radius: 0;
+    border-left: none;
+    border-right: none;
+    border-top: none;
+    padding: 12px;
+    box-shadow: none;
+  }
+
+  /* Mapa com área limpa, 100% visível e fácil de navegar com os dedos */
+  .map-canvas-wrapper {
+    width: 100%;
+    height: 55vh;
+    min-height: 360px;
+    position: relative;
+  }
+
+  .map-layers-switch {
+    top: 10px;
+    right: 10px;
+  }
+
+  .layer-switch-btn {
+    padding: 6px 9px;
+    font-size: 0.72rem;
+  }
+
+  /* Chips de filtro deslizáveis horizontalmente (1 linha limpa) */
+  .category-filter-chips {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: 4px;
+    scrollbar-width: none;
+  }
+  .category-filter-chips::-webkit-scrollbar {
+    display: none;
+  }
+  .filter-chip {
+    flex-shrink: 0;
+    padding: 6px 11px;
+    font-size: 0.74rem;
+  }
+
+  /* HUD de simulação ajustado para a largura do celular */
+  .hud-simulation-card {
+    min-width: 0;
+    width: calc(100% - 20px);
+    left: 10px;
+    right: 10px;
+    transform: none;
+    bottom: 10px;
+    padding: 10px 12px;
+    gap: 10px;
+  }
+
+  .speed-value {
+    font-size: 1.4rem;
+  }
+
+  .hud-next-alert {
+    font-size: 0.78rem;
+  }
+
+  .hud-desc {
+    font-size: 0.7rem;
+  }
+
+  /* Sidebar ocupando largura total e abas fixas ao rolar */
   .app-sidebar {
     width: 100%;
     height: auto;
     max-height: none;
+    border-left: none;
+    border-top: 1px solid var(--border-color);
     box-shadow: none;
   }
 
-  .hud-simulation-card {
-    min-width: 90%;
-    bottom: 10px;
-    padding: 10px;
+  .sidebar-tabs {
+    position: sticky;
+    top: 0;
+    z-index: 300;
+    background: var(--bg-primary);
   }
-  
-  .driver-profile-pill {
-    display: none;
+
+  .sidebar-content {
+    padding: 12px;
+    overflow: visible;
+  }
+
+  /* Evita zoom automático indesejado no iOS Safari / Android ao tocar nos campos */
+  .input-with-action input,
+  .search-box input,
+  .form-control {
+    font-size: 16px;
+  }
+
+  /* Popups do mapa compactos no celular */
+  .leaflet-popup-content-wrapper {
+    max-width: 265px;
+  }
+
+  /* Barra de navegação inferior estilo App Mobile */
+  .mobile-bottom-nav {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 60px;
+    background: rgba(15, 23, 42, 0.96);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    border-top: 1px solid rgba(255, 255, 255, 0.12);
+    z-index: 1500;
+    box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.5);
+  }
+
+  .mobile-nav-btn {
+    background: transparent;
+    border: none;
+    color: var(--text-muted);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 3px;
+    cursor: pointer;
+    font-family: var(--font-family);
+    transition: all 0.2s ease;
+  }
+
+  .mobile-nav-btn.active {
+    color: #38bdf8;
+    font-weight: 700;
+    background: rgba(56, 189, 248, 0.08);
+  }
+
+  .mobile-nav-icon {
+    font-size: 1.15rem;
+    line-height: 1;
+  }
+
+  .mobile-nav-label {
+    font-size: 0.68rem;
+  }
+}
+
+/* Ajustes finos para telas de celulares menores (<= 480px) */
+@media (max-width: 480px) {
+  .header-actions {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .btn-header {
+    font-size: 0.74rem;
+    padding: 8px 6px;
+  }
+
+  .rodizio-checker-header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .rodizio-checker-header > div {
+    width: 100%;
+  }
+
+  #licensePlateInput {
+    flex: 1;
+  }
+
+  .form-row {
+    flex-direction: column;
+    gap: 0;
+  }
+
+  .calc-summary-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+
+  .calc-summary-val {
+    font-size: 0.95rem;
+  }
+
+  .vehicle-data-grid {
+    grid-template-columns: 1fr;
   }
 }

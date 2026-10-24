@@ -2102,6 +2102,16 @@ function focusOnPoint(id) {
   const point = POINTS_DATA.find(p => p.id === id);
   if (!point || !AppState.map) return;
 
+  if (window.innerWidth <= 900) {
+    const mapCanvas = document.getElementById("mapCanvasWrapper");
+    if (mapCanvas) {
+      mapCanvas.scrollIntoView({ behavior: "smooth", block: "center" });
+    }
+    document.querySelectorAll(".mobile-nav-btn").forEach(b => {
+      b.classList.toggle("active", b.getAttribute("data-mobile-target") === "map");
+    });
+  }
+
   AppState.map.setView([point.lat, point.lng], 14, { animate: true });
   AppState.markersLayer.eachLayer(layer => {
     if (layer.getLatLng && 
@@ -2483,19 +2493,53 @@ function setupEventListeners() {
   }
 
   const tabBtns = document.querySelectorAll(".tab-btn");
+  const mobileNavBtns = document.querySelectorAll(".mobile-nav-btn");
+
+  function activateSidebarTab(targetTab) {
+    tabBtns.forEach(b => b.classList.toggle("active", b.getAttribute("data-tab") === targetTab));
+    document.querySelectorAll(".tab-pane").forEach(pane => pane.style.display = "none");
+    const activePane = document.getElementById(`tab-${targetTab}`);
+    if (activePane) activePane.style.display = "block";
+    mobileNavBtns.forEach(b => b.classList.toggle("active", b.getAttribute("data-mobile-target") === targetTab));
+  }
+
   tabBtns.forEach(btn => {
     btn.addEventListener("click", () => {
-      tabBtns.forEach(b => b.classList.remove("active"));
-      btn.classList.add("active");
-
       const targetTab = btn.getAttribute("data-tab");
-      document.querySelectorAll(".tab-pane").forEach(pane => pane.style.display = "none");
-
-      const activePane = document.getElementById(`tab-${targetTab}`);
-      if (activePane) activePane.style.display = "block";
+      activateSidebarTab(targetTab);
       playNotificationBeep(500, 0.04);
     });
   });
+
+  mobileNavBtns.forEach(btn => {
+    btn.addEventListener("click", () => {
+      const target = btn.getAttribute("data-mobile-target");
+      mobileNavBtns.forEach(b => b.classList.remove("active"));
+      btn.classList.add("active");
+
+      if (target === "map") {
+        const mapSection = document.getElementById("mapSection");
+        if (mapSection) mapSection.scrollIntoView({ behavior: "smooth", block: "start" });
+      } else {
+        activateSidebarTab(target);
+        const sidebarEl = document.getElementById("appSidebar");
+        if (sidebarEl) sidebarEl.scrollIntoView({ behavior: "smooth", block: "start" });
+      }
+      playNotificationBeep(500, 0.04);
+    });
+  });
+
+  const btnTogglePlanner = document.getElementById("btnTogglePlanner");
+  const plannerInputs = document.getElementById("plannerInputsCollapse");
+  if (btnTogglePlanner && plannerInputs) {
+    btnTogglePlanner.addEventListener("click", () => {
+      const isCollapsed = plannerInputs.classList.toggle("collapsed");
+      btnTogglePlanner.innerHTML = isCollapsed ? "🔽 Editar Rota" : "🔼 Recolher";
+      setTimeout(() => {
+        if (AppState.map) AppState.map.invalidateSize();
+      }, 200);
+    });
+  }
 
   const fuelTypeSelect = document.getElementById("calcFuelType");
   if (fuelTypeSelect) {
